@@ -1,0 +1,46 @@
+G18 G90
+R20 = 0
+R21 = 0
+R22 = 0
+;-----------------------------------------------------------------
+WHILE R22 < END
+  R22 = R22 + TOTAL_INC
+  IF R22 > END
+    R22 = END
+  ENDIF
+  WHILE R20 < R22
+    R20 = R20 + H_INC
+    IF R20 > R22
+      R20 = R22
+    ENDIF
+    G00 AX[AXNAME(V_AXIS)] = 0
+    G00 AX[AXNAME(H_AXIS)] = 0
+    IF OPTION == 0
+      MSG(MESSAGE[0] <<R20<< MESSAGE[1] <<R20)
+      G00 AX[AXNAME(H_AXIS)] = -R20 AX[AXNAME(V_AXIS)] = -R20
+    ELSE
+      MSG(MESSAGE[0] <<R20<< MESSAGE[3] <<R20)
+      G00 AX[AXNAME(H_AXIS)] = -R20 AX[AXNAME(V_AXIS)] = R20
+    ENDIF
+    CALL "THREAD_EXT"
+  ENDWHILE
+;-----------------------------------------------------------------
+  R21 = R20
+  WHILE R21 < WIDTH
+    R21 = R21 + V_INC
+    IF R21 > WIDTH
+      R21 = WIDTH
+    ENDIF
+    G00 AX[AXNAME(H_AXIS)] = -R20
+    IF OPTION == 0
+      MSG(MESSAGE[0] <<R20<< MESSAGE[1] <<R21)
+      G00 AX[AXNAME(V_AXIS)] = -R21
+    ELSE
+      MSG(MESSAGE[0] <<R20<< MESSAGE[3] <<R21)
+      G00 AX[AXNAME(V_AXIS)] = R21
+    ENDIF
+    CALL "THREAD_EXT"
+  ENDWHILE
+ENDWHILE
+;-----------------------------------------------------------------
+M17

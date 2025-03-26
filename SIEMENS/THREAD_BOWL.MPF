@@ -1,0 +1,103 @@
+;=========================================================
+; DECLARACIÓN DE PARÁMETROS
+;=========================================================
+TOTAL_INC = 0.3              ;INCREMENTO POR CICLO                
+LENGTH = -460                ;LONGITUD DEL CICLO                  
+WIDTH = 29.6                 ;DISTANCIA ENTRE FLANCOS             
+END = 26.2                   ;ALTURA DEL FILETE                   
+H_INC = 0.3                  ;PENETRACION POR CICLO               
+V_INC = 6                    ;INCREMENTO EN VERTICAL
+OPTION = 2                   ;DIRECCION DEL ANGULO (1=NEGATIVO, 2=POSITIVO)
+
+;=========================================================
+; DECLARACIÓN DE MENSAJES
+;=========================================================
+MESSAGE[0] = "PROFUNDIDAD X: -"
+MESSAGE[1] = " | POSICION Z: -"
+MESSAGE[2] = "PROFUNDIDAD X: "
+MESSAGE[3] = " | POSICION Z: "
+
+;=========================================================
+; CONFIGURACIÓN INICIAL
+;=========================================================
+G18 G90 G71 G95              ;PLANO ZX, COTAS ABSOLUTAS, MÉTRICO, AVANCE MM/REV
+G54 DIAMOF                   ;ACTIVAR DECALAJE, PROGRAMAR EN DIÁMETROS
+T1 D1                        ;HERRAMIENTA 1, CORRECTOR 1
+S18 M3                       ;VELOCIDAD 18 RPM, GIRO HORARIO
+
+;=========================================================
+; VARIABLES DE TRABAJO
+;=========================================================
+R20 = 0                      ;PROFUNDIDAD ACTUAL
+R30 = 0                      ;POSICIÓN VERTICAL ACTUAL
+R40 = 0                      ;PROFUNDIDAD OBJETIVO DEL CICLO
+V_START = 0                  ;POSICIÓN Z DE INICIO
+TPI = 50.8                   ;PASO DE LA ROSCA
+DISTANCE = 20                ;DISTANCIA SEGURIDAD RETORNO HERRAMIENTA
+
+;=========================================================
+; CICLO PRINCIPAL DE MECANIZADO
+;=========================================================
+WHILE R40 < END              ;BUCLE PRINCIPAL DE PROFUNDIDAD
+  ; Incremento de profundidad objetivo
+  R40 = R40 + TOTAL_INC
+  IF R40 > END
+    R40 = END
+  ENDIF
+  
+  ; Ciclos de penetración gradual
+  WHILE R20 < R40
+    R20 = R20 + H_INC
+    IF R20 > R40
+      R20 = R40
+    ENDIF
+    
+    ; Posicionamiento a punto seguro
+    G00 X=0 Z=0
+    
+    ; Posicionamiento según dirección del ángulo
+    IF OPTION == 2
+      MSG(MESSAGE[0] <<R20<< MESSAGE[3] <<R20)
+      G00 X=-R20 Z=R20
+    ELSE
+      MSG(MESSAGE[0] <<R20<< MESSAGE[1] <<R20)
+      G00 X=-R20 Z=-R20
+    ENDIF
+    
+    ; Mecanizado de rosca
+    G33 Z=LENGTH K=TPI       ;CICLO DE ROSCADO
+    G00 X=DISTANCE           ;RETIRADA EN X
+    G00 Z=V_START            ;RETORNO A Z INICIAL
+  ENDWHILE
+  
+  ; Ciclos de ensanchamiento
+  R30 = R20
+  WHILE R30 < WIDTH
+    R30 = R30 + V_INC
+    IF R30 > WIDTH
+      R30 = WIDTH
+    ENDIF
+    
+    ; Posicionamiento a profundidad actual
+    G00 X=-R20
+    
+    ; Posicionamiento según dirección del ángulo
+    IF OPTION == 2
+      MSG(MESSAGE[0] <<R20<< MESSAGE[3] <<R30)
+      G00 Z=R30
+    ELSE
+      MSG(MESSAGE[0] <<R20<< MESSAGE[1] <<R30)
+      G00 Z=-R30
+    ENDIF
+    
+    ; Mecanizado de rosca
+    G33 Z=LENGTH K=TPI       ;CICLO DE ROSCADO
+    G00 X=DISTANCE           ;RETIRADA EN X
+    G00 Z=V_START            ;RETORNO A Z INICIAL
+  ENDWHILE
+ENDWHILE
+
+;=========================================================
+; FIN DE PROGRAMA
+;=========================================================
+M30

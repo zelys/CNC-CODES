@@ -1,0 +1,24 @@
+; Width expansion cycles
+R30 = R20
+WHILE R30 < THREAD_WIDTH
+  R30 = R30 + AXIAL_OFFSET
+  IF R30 > THREAD_WIDTH
+    R30 = THREAD_WIDTH
+  ENDIF
+  
+  ; Position to current depth
+  G00 X=-R20
+  
+  ; Position according to angle direction
+  IF ANGLE_DIRECTION == 2
+    MSG(MESSAGE[0] <<R20<< MESSAGE[3] <<R30)
+    G00 Z=R30
+  ELSE
+    MSG(MESSAGE[0] <<R20<< MESSAGE[1] <<R30)
+    G00 Z=-R30
+  ENDIF
+  
+  ; Thread machining
+  CALL "THREAD_CUTTING"
+ENDWHILE
+M17

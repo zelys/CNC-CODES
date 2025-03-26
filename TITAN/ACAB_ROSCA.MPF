@@ -1,0 +1,33 @@
+;-----------------------------------------------------------------
+;    P A R A M E T R O S   H I L O    S I E R R A    B O W L      
+;-----------------------------------------------------------------
+RPM = 18             ;RPM PLATO                                   
+H_START = 0          ;INICIO EJE X                                
+V_START = 0          ;INICIO EJE Z                                
+H_INC = 0.3          ;INCREMENTO EN X                             
+V_INC = 0.3          ;INCREMENTO EN Z                             
+WIDTH = 29.6         ;DISTANCIA ENTRE FLANCOS                     
+LENGTH = -460        ;LONGITUD DEL CICLO                          
+END = 26.2           ;LIMITE ALTURA FINAL FILETE                  
+OPTION = 0           ;DIRECCION DEL ANGULO (0/1)                  
+;-----------------------------------------------------------------
+;                       A T E N C I O N                           
+;-----------------------------------------------------------------
+;- LOS PARAMTROS SOLO RECIBEN VALORES POSITIVOS (EXCEPTO LENGTH). 
+;- SEGUN LA HERRAMIENTA SELECCIONADA APLICAR INCREMENTO.          
+;- PARA LA DISTANCIA ENTRE FLANCOS DESCONTAR FORMA DE LA PLACA.   
+;- ANTES DE EJECUTAR, SIMULAR EL PROGRAMA.                        
+;- EN CASO DE DUDAS CONSULTAR CON UN PROFESIONAL.                 
+;-----------------------------------------------------------------
+GROUP_BEGIN(0,"M A I N   P R O G R A M",0,0)
+CALL "THREAD_CONDITION"
+G18 G90 G71 G97 DIAMOF
+S = RPM M4 T2D4
+TPI = 50.8
+DISTANCE = 20
+H_AXIS="X"
+V_AXIS="Z"
+CALL "MESSAGES"
+CALL "RHS_END"
+M30
+GROUP_END(0,0)

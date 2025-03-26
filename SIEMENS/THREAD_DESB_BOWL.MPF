@@ -1,0 +1,50 @@
+;=========================================================
+; DECLARACIÓN DE PARÁMETROS
+;=========================================================
+THREAD_DEPTH_INC = 0.3       ;INCREMENTO POR CICLO                 
+THREAD_LENGTH = -460         ;LONGITUD DEL CICLO                  
+THREAD_WIDTH = 29.6          ;DISTANCIA ENTRE FLANCOS             
+THREAD_FINAL_DEPTH = 26.2    ;ALTURA DEL FILETE                   
+RADIAL_INFEED = 0.3          ;PENETRACION POR CICLO               
+AXIAL_OFFSET = 6             ;INCREMENTO VERTICAL
+ANGLE_DIRECTION = 2          ;DIRECCION DEL ANGULO (1=NEGATIVO, 2=POSITIVO)
+
+;=========================================================
+; INITIAL SETUP
+;=========================================================
+G18 G90 G71 G95              ;ZX PLANE, ABSOLUTE COORDS, METRIC, FEED IN MM/REV
+G54 DIAMOF                   ;ACTIVATE WORK OFFSET, DIAMETER PROGRAMMING
+T1 D1                        ;TOOL 1, OFFSET 1
+S18 M3                       ;SPINDLE SPEED 18 RPM, CLOCKWISE ROTATION
+
+;=========================================================
+; WORKING VARIABLES
+;=========================================================
+THREAD_PITCH = 50.8          ;THREAD PITCH
+SAFETY_DISTANCE = 20         ;TOOL RETRACTION SAFETY DISTANCE
+Z_START_POS = 0              ;Z AXIS STARTING POSITION
+R20 = 0                      ;CURRENT_DEPTH
+R30 = 0                      ;CURRENT_AXIAL_POSITION
+R40 = 0                      ;TARGET_DEPTH_FOR_CYCLE
+
+;=========================================================
+; MAIN MACHINING CYCLE
+;=========================================================
+CALL "MESSAGES"         ;DISPLAY MESSAGE
+
+WHILE R40 < THREAD_FINAL_DEPTH       ;MAIN DEPTH LOOP
+  ; Increment target depth
+  R40 = R40 + THREAD_DEPTH_INC
+  IF R40 > THREAD_FINAL_DEPTH
+    R40 = THREAD_FINAL_DEPTH
+  ENDIF
+  
+  CALL "RADIAL_INFEED"         ;GRADUAL PENETRATION CYCLES
+  CALL "AXIAL_OFFSET"          ;WIDTH EXPANSION CYCLES
+
+ENDWHILE
+
+;=========================================================
+; END OF PROGRAM
+;=========================================================
+M30

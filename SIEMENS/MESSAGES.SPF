@@ -1,0 +1,8 @@
+;=========================================================
+; MESSAGE DECLARATION
+;=========================================================
+MESSAGE[0] = "PROFUNDIDAD X: -"
+MESSAGE[1] = " | POSICION Z: -"
+MESSAGE[2] = "PROFUNDIDAD X: "
+MESSAGE[3] = " | POSICION Z: "
+M17

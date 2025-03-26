@@ -1,0 +1,23 @@
+; Gradual penetration cycles
+WHILE R20 < R40
+  R20 = R20 + RADIAL_INFEED
+  IF R20 > R40
+    R20 = R40
+  ENDIF
+  
+  ; Position to safe point
+  G00 X=0 Z=0
+  
+  ; Position according to angle direction
+  IF ANGLE_DIRECTION == 2
+    MSG(MESSAGE[0] <<R20<< MESSAGE[3] <<R20)
+    G00 X=-R20 Z=R20
+  ELSE
+    MSG(MESSAGE[0] <<R20<< MESSAGE[1] <<R20)
+    G00 X=-R20 Z=-R20
+  ENDIF
+  
+  ; Thread machining
+  CALL "THREAD_CUTTING"
+ENDWHILE
+M17

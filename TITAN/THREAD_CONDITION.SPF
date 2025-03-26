@@ -1,0 +1,11 @@
+IF (RPM < 0) OR (TOTAL_INC < 0) OR (WIDTH < 0) OR (V_INC < 0) OR (H_INC < 0) OR (TPI < 0) OR (OPTION < 0) OR (END < 0) OR (V_START < 0) OR (H_START < 0) OR (DISTANCE < 0)
+;------------------------------------------------------------------
+MSG("LOS PARAMETROS DEBEN SER VALORES POSITIVOS")
+M0
+ENDIF
+;------------------------------------------------------------------
+IF (OPTION < 0)
+MSG("[ OPTION ] TIPO DE ROSCA NO VALIDO")
+M0
+ENDIF
+M17

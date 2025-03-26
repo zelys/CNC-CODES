@@ -1,0 +1,50 @@
+G18 G90
+R8=0
+R9=0
+END=END-H_START
+WIDTH=WIDTH-V_START
+;------------------------------------------------------------------
+WHILE (R8 < END) AND (R9 < END)
+  IF (R8+H_INC > END) OR (R9+V_INC > END)
+    R8=END
+    R9=END
+  ELSE
+    R8=R8+H_INC
+    R9=R9+V_INC
+  ENDIF
+  IF H_INC==0
+    R8=0
+  ENDIF
+  IF V_INC==0
+    R9=0
+  ENDIF
+  G00 AX[AXNAME(H_AXIS)]=-H_START
+  G00 AX[AXNAME(V_AXIS)]=V_START
+  IF OPTION == 0
+    MSG(MESSAGE[0] <<R8<< MESSAGE[1] <<R9)
+    G00 AX[AXNAME(H_AXIS)]=-H_START-R8 AX[AXNAME(V_AXIS)]=-V_START-R9
+  ELSE
+    MSG(MESSAGE[0] <<R8<< MESSAGE[3] <<R9)
+    G00 AX[AXNAME(H_AXIS)]=-H_START-R8 AX[AXNAME(V_AXIS)]=V_START+R9
+  ENDIF
+  CALL "THREAD_EXT"
+ENDWHILE
+;------------------------------------------------------------------
+WHILE (R9 < WIDTH) AND (V_INC > 0)
+  IF R9+V_INC > WIDTH
+    R9=WIDTH
+  ELSE
+    R9=R9+V_INC
+  ENDIF
+  G00 AX[AXNAME(H_AXIS)]=-R8
+  IF OPTION == 0
+    MSG(MESSAGE[0] <<R8<< MESSAGE[1] <<R9)
+    G00 AX[AXNAME(V_AXIS)]=-R9
+  ELSE
+    MSG(MESSAGE[0] <<R8<< MESSAGE[3] <<R9)
+    G00 AX[AXNAME(V_AXIS)]=R9
+  ENDIF
+  CALL "THREAD_EXT"
+ENDWHILE
+;------------------------------------------------------------------
+M17

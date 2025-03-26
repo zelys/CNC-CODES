@@ -1,0 +1,33 @@
+N10 G18 G90 G40 G71
+N20 G54 
+N30 DIAMOF
+N40 LIMS=1400 
+N50 T1 D1 
+N70 G96 S200 M3 F0.12
+;================================================================
+; Definición de parámetros
+;================================================================
+R10=10.0    ; Radio a mecanizar
+R11=0.18    ; Incremento por paso
+R20=0       ; Valor inicial
+R21=0       ; Valor inicial
+;================================================================
+; Inicia Ciclo de Construcción de Radio
+;================================================================
+N80 G0 X0 Z0
+MSG("Mecanizado de Radio R"<<R10)
+WHILE R20 < R10
+   R20=R20+R11; Actualizar posición
+   IF R20 > R10
+      R20=R10
+   ENDIF
+   ; Calcular avance usando la ecuación del círculo:
+   ; (R10 - SQRT(R10R10 - R20R20))
+   R21=(R10-SQRT(R10R10-R20R20))
+   G3 X=-R20 Z=R21 CR=R10 ; Mecanizar segmento con radio
+ENDWHILE
+N100 G0 Z100
+;================================================================
+; Fin de Programa
+;================================================================
+M30
