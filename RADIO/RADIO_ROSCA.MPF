@@ -1,0 +1,36 @@
+N10 G18 G90 G40 G71
+N20 G54 
+N30 DIAMOF
+N40 LIMS=1400 
+N50 T1 D1 
+N70 G96 S200 M3 F0.12
+;================================================================
+; Definición de parámetros
+;================================================================
+R10=1.8    ; Radio a mecanizar
+R11=10     ; Divisiones del radio
+R20=0      
+R21=0
+R22=0
+R23=0
+R24=0
+R25=0      
+R30 = (90 / R11) * (3.141592653589793 / 180) ; Grados por paso
+;================================================================
+; Inicia Ciclo de Construcción de Radio
+;================================================================
+N80 G0 X0 Z0
+FOR R0=0 TO R11
+    R20 = R10 * COS(R0 * R30) 
+    R21 = R10 * SIN(R0 * R30) 
+    R22 = R10 * COS((R0+1) * R30)
+    R23 = R10 * SIN((R0+1) * R30) 
+    R24 = ABS(R22-R20) ; Coordenada Z (COS)
+    R25 = ABS(R23-R21) ; Coordenada X (SIN)
+    G3 X=-R25 Z=R24 CR=R10  ; Mecanizar segmento con radio
+ENDFOR
+G0 Z100  ; Movimiento rápido después de cada pasada
+;================================================================
+; Fin de Programa
+;================================================================
+M30
