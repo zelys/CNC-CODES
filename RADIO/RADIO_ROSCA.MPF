@@ -8,28 +8,19 @@ N70 G96 S200 M3 F0.12
 ; Definición de parámetros
 ;================================================================
 R10=1.8    ; Radio a mecanizar
-R11=10     ; Divisiones del radio
-R20=0      
-R21=0
-R22=0
-R23=0
-R24=0
-R25=0      
-R30 = (90 / R11) * (3.141592653589793 / 180) ; Grados por paso
+R11=10     ; Divisiones de la circunferencia    
+R30 = 90 / R11 ; Ángulo de cada división en grados
 ;================================================================
 ; Inicia Ciclo de Construcción de Radio
 ;================================================================
 N80 G0 X0 Z0
-FOR R0=0 TO R11
-    R20 = R10 * COS(R0 * R30) 
-    R21 = R10 * SIN(R0 * R30) 
-    R22 = R10 * COS((R0+1) * R30)
-    R23 = R10 * SIN((R0+1) * R30) 
-    R24 = ABS(R22-R20) ; Coordenada Z (COS)
-    R25 = ABS(R23-R21) ; Coordenada X (SIN)
-    G3 X=-R25 Z=R24 CR=R10  ; Mecanizar segmento con radio
+FOR R0=1 TO (R11+1)
+    R20 = R30 * R0 ; Ángulo actual
+    R21 = R10 * SIN(R20) ; Coordenada X
+    R22 = R10 * (1 - COS(R20)) ; Coordenada Z
+    G3 X=-R21 Z=R22 CR=R10  ; Mecanizar segmento con radio
 ENDFOR
-G0 Z100  ; Movimiento rápido después de cada pasada
+G0 X100  ; Movimiento rápido después de cada pasada
 ;================================================================
 ; Fin de Programa
 ;================================================================
