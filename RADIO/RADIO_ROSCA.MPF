@@ -14,7 +14,7 @@ R30 = 90 / R11 ; Ángulo de cada división en grados
 ; Inicia Ciclo de Construcción de Radio
 ;================================================================
 N80 G0 X0 Z0
-FOR R0=1 TO (R11+1)
+FOR R0=1 TO R11
     R20 = R30 * R0 ; Ángulo actual
     R21 = R10 * SIN(R20) ; Coordenada X
     R22 = R10 * (1 - COS(R20)) ; Coordenada Z
