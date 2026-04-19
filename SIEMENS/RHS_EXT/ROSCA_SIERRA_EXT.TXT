@@ -1,0 +1,118 @@
+;================================================================
+; PARAMETROS: ROSCADO HILO SIERRA EXTERIOR
+;================================================================
+_PROF_CICLO = 0.3      ; Incremento radial por pasada (X/Z)
+_AVANCE_XZ  = 0.2      ; Avance fino X/Z
+_AVANCE_Z   = 4.0      ; Avance axial (paso entre flancos)
+_DIST_FLANCOS = 28.0   ; Ancho total de la ranura
+_PROF_FINAL = 26.5     ; Profundidad total en X
+_LONG_Z     = -470.0   ; Longitud final del roscado
+_DIR_ANGULO = 1        ; Direccion (0: Positivo / 1: Negativo)
+_PASO_K     = 50.8     ; Paso de la rosca (K)
+_DIST_SEG   = 5.0      ; Distancia de seguridad en X
+
+;================================================================
+; PROGRAMA PRINCIPAL: CONFIGURACIÓN DE ROSCADO
+;================================================================
+G18 G90 G71 G97 G40      ; Plano ZX, Absolutas, Metrico, RPM constantes
+T3 D1                    ; Herramienta 3, Filo 1
+S18 M03                  ; RPM's, Sentido horario
+
+VALIDAR_PARAM            ; Llamada a subrutina de seguridad
+LOGICA_PPAL_RHS          ; Ejecucion de los ciclos de corte
+
+M30                      ; Fin de programa
+
+;================================================================
+; SUB-PROGRAMA: LÓGICA PRINCIPAL DE ROSCADO
+;================================================================
+PROC LOGICA_PPAL_RHS
+; --- VARIABLES INTERNAS DE TRABAJO ---
+_ACT_PROF = 0   ; Profundidad actual de corte
+_ACT_OFFS = 0   ; Desplazamiento axial actual
+_LIMITE   = 0   ; Limite incremental del ciclo actual
+
+; --- INICIO BUCLE RADIAL (PROFUNDIDAD X) ---
+WHILE _LIMITE < _PROF_FINAL
+  _LIMITE = _LIMITE + _PROF_CICLO
+  
+  ; Ajuste de ultima pasada para evitar sobre-corte
+  IF (_PROF_FINAL - _LIMITE) < (_PROF_CICLO * 0.1)
+    _LIMITE = _PROF_FINAL
+  ENDIF
+  
+  WHILE _ACT_PROF < _LIMITE
+    _ACT_PROF = _ACT_PROF + _AVANCE_XZ
+    IF _ACT_PROF > _LIMITE
+      _ACT_PROF = _LIMITE
+    ENDIF
+    
+    G0 Z0 X0 ; Retorno a origen de pasada
+    
+    ; Lógica de dirección de ángulo según GUD
+    IF _DIR_ANGULO > 0
+      MSG("PROF. X: -" << _ACT_PROF << " | POS. Z: -" << _ACT_PROF)
+      G0 X=-_ACT_PROF Z=-_ACT_PROF
+    ELSE
+      MSG("PROF. X: " << _ACT_PROF << " | POS. Z: " << _ACT_PROF)
+      G0 X=-_ACT_PROF Z=_ACT_PROF
+    ENDIF
+    
+    EJECUTAR_G33 ; Llama al ciclo de roscado sincronizado
+  ENDWHILE
+  
+  ; --- BUCLE AXIAL (OFFSET Z ENTRE FLANCOS) ---
+  _ACT_OFFS = _ACT_PROF
+  WHILE _ACT_OFFS < _DIST_FLANCOS
+    _ACT_OFFS = _ACT_OFFS + _AVANCE_Z
+    IF _ACT_OFFS > _DIST_FLANCOS
+      _ACT_OFFS = _DIST_FLANCOS
+    ENDIF
+    
+    G0 X=-_ACT_PROF
+    IF _DIR_ANGULO > 0
+      MSG("PROF. X: -" << _ACT_PROF << " | POS. Z: -" << _ACT_OFFS)
+      G0 Z=-_ACT_OFFS
+    ELSE
+      MSG("PROF. X: " << _ACT_PROF << " | POS. Z: " << _ACT_OFFS)
+      G0 Z=_ACT_OFFS
+    ENDIF
+
+    EJECUTAR_G33
+  ENDWHILE
+ENDWHILE
+
+MSG("") ; Limpiar barra de mensajes
+RET ; Regreso al principal
+
+;================================================================
+; SUB-PROGRAMA: ROSCADO SINCRONIZADO
+;================================================================
+PROC EJECUTAR_G33
+G33 Z=_LONG_Z K=_PASO_K 
+G00 X=_DIST_SEG  ; Retirada rapida a seguridad
+G00 Z0           ; Regreso al inicio axial
+RET
+
+;================================================================
+; SUB-PROGRAMA: VALIDACIÓN DE PARÁMETROS
+;================================================================
+PROC VALIDAR_PARAM
+; --- CHEQUEO DE VALORES NEGATIVOS ---
+IF (_PROF_CICLO<0) OR (_DIST_FLANCOS<0) OR (_PROF_FINAL<0)
+  SETAL(61000, "ERROR: DATOS DE CORTE NEGATIVOS") ; Genera alarma de ciclo
+  M30
+ENDIF
+
+; --- CHEQUEO DE OPCION DE ANGULO ---
+IF (_DIR_ANGULO > 1) OR (_DIR_ANGULO < 0)
+  SETAL(61001, "DIRECCION ANGULO SOLO 0 o 1")
+  M30
+ENDIF
+
+; --- SEGURIDAD DE INCREMENTOS ---
+IF _PROF_CICLO > _PROF_FINAL
+  MSG("ADVERTENCIA: INCREMENTO MAYOR QUE PROFUNDIDAD TOTAL")
+  M30
+ENDIF
+RET
