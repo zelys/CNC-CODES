@@ -1,0 +1,7 @@
+;================================================================
+; DEFINICION DE VARIABLES GLOBALES PARA HILO SIERRA
+;================================================================
+DEF NCK REAL _PROF_CICLO, _AVANCE_XZ, _AVANCE_Z, _DIST_FLANCOS, _PROF_FINAL, _LONG_Z
+DEF NCK INT _DIR_ANGULO
+DEF NCK REAL _PASO_K, _DIST_SEG, _ACT_PROF, _ACT_OFFS, _LIMITE
+M30
